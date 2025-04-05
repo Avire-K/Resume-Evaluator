@@ -166,7 +166,12 @@ export default function MultipleResumes() {
             </form>
           </div>
         ) : (
-          <ResultsList results={results} threshold={threshold} onReset={() => setResults(null)} />
+          <ResultsList 
+            results={results} 
+            threshold={threshold} 
+            onReset={() => setResults(null)} 
+            jobDescription={jobDescription}
+          />
         )}
       </main>
 
@@ -177,7 +182,41 @@ export default function MultipleResumes() {
   );
 }
 
-function ResultsList({ results, threshold, onReset }) {
+function ResultsList({ results, threshold, onReset, jobDescription }) {
+  const [isSendingEmails, setIsSendingEmails] = useState(false);
+  const [emailStatus, setEmailStatus] = useState('');
+
+  const handleSendEmails = async () => {
+    if (results.qualifying.length === 0) return;
+    
+    setIsSendingEmails(true);
+    setEmailStatus('');
+    
+    try {
+      const response = await fetch('/api/send-emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          candidates: results.qualifying,
+          jobDescription: jobDescription
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setEmailStatus(`Successfully sent ${data.sentCount} emails to qualified candidates.`);
+    } catch (err) {
+      setEmailStatus(`Failed to send emails: ${err.message}`);
+    } finally {
+      setIsSendingEmails(false);
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
@@ -186,7 +225,7 @@ function ResultsList({ results, threshold, onReset }) {
         </h2>
         <button
           onClick={onReset}
-          className="bg-blue-600 hover:bg-blue-700 text-slate-700 px-4 py-2 rounded"
+          className="bg-blue-600 hover:bg-blue-700 text-slate-700 px-4 py-2 rounded mr-2"
         >
           Process New Batch
         </button>
@@ -198,7 +237,7 @@ function ResultsList({ results, threshold, onReset }) {
             Found {results.qualifying.length} candidate{results.qualifying.length !== 1 ? 's' : ''} out of {results.total} resumes that match{results.qualifying.length !== 1 ? '' : 'es'} your criteria.
           </p>
           
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto mb-6">
             <table className="min-w-full bg-white border border-slate-200">
               <thead>
                 <tr className="bg-slate-100">
@@ -227,6 +266,38 @@ function ResultsList({ results, threshold, onReset }) {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-6 border-t pt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+              <button
+                onClick={handleSendEmails}
+                disabled={isSendingEmails}
+                className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded flex items-center mb-3 sm:mb-0"
+              >
+                {isSendingEmails ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending Emails...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Send Emails to Qualified Candidates
+                  </>
+                )}
+              </button>
+              {emailStatus && (
+                <span className={`text-sm ${emailStatus.includes('Failed') ? 'text-red-500' : 'text-green-600'}`}>
+                  {emailStatus}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       ) : (
