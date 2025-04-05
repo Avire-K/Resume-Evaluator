@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Resume Evaluator 💼
 
-## Getting Started
+## 🚀 About the Project
 
-First, run the development server:
+This project aims to **filter and evaluate resumes** to find the ones most suitable for a given job description using AI. The website features two main functionalities:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Single Resume Evaluation**
+2. **Multiple Resumes Evaluation**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 📄 Multiple Resumes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This page allows you to select a **folder** containing multiple resumes. It includes the following input fields:
 
-## Learn More
+- **Resume Folder:** Select the folder containing the resumes (PDFs).
+- **Job Description:** Enter the job description for the role.
+- **Threshold Score:** Specify the minimum matching score a resume must have to be shortlisted.
 
-To learn more about Next.js, take a look at the following resources:
+Once the inputs are provided, the resumes are evaluated using AI. Resumes that score **above the threshold** are displayed with their **name** and **email address**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+✅ A **Send Emails** button is available below the results to send emails directly to the shortlisted candidates.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📃 Single Resume
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This page allows you to:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Upload a single resume in **PDF format**.
+- Enter a **job description** relevant to the position you're applying for.
+
+A custom AI model analyzes your resume and the provided job description, giving you:
+
+- A **relevance score**.
+- Insights on how to **improve your resume** to make it more suitable for the job description.
+
+---
+
+## 🛠️ Technology Used
+
+- **Next.js** – Used to build the frontend of the website.
+- **PyMuPDF** – Python library used to extract text from uploaded PDF resumes.
+- **LLaMA 3.2** (via **Ollama**) – Used to analyze resumes and extract structured JSON data representing different sections.
+- **Evaluator Bot** – A custom **Phi-4** based AI model trained to deeply understand industry technologies and assess resumes based on job descriptions.
+- **smtplib** – Python library used to send emails to shortlisted candidates.
+
+---
+
+## 🧪 How to Run the Project
+
+> ⚠️ **Prerequisite:** Ensure [Ollama](https://ollama.com/) is installed on your system.
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/Avire-K/Resume-Evaluator.git
+    ```
+
+2. Navigate into the project directory:
+
+    ```bash
+    cd Resume-Evaluator
+    ```
+
+3. Install frontend dependencies:
+
+    ```bash
+    npm install
+    ```
+
+4. Create the **phi4-based Evaluator bot** using Ollama:
+
+    ```bash
+    ollama create evaluator -f Modelfile
+    ```
+
+5. Start the development server:
+
+    ```bash
+    npm run dev
+    ```
+
+---
+
+
