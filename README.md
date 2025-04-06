@@ -21,6 +21,9 @@ Once the inputs are provided, the resumes are evaluated using AI. Resumes that s
 
 ✅ A **Send Emails** button is available below the results to send emails directly to the shortlisted candidates.
 
+💾 **Note:** All the resumes, along with their **personal information**, **score**, and **evaluation details**, are stored in the **database** for reference and record-keeping.
+
+
 ---
 
 ## 📃 Single Resume
@@ -74,6 +77,15 @@ A custom AI model analyzes your resume and the provided job description, giving 
     ```bash
     ollama create evaluator -f Modelfile
     ```
+
+   > 🧠 This command creates a custom model named `evaluator` using the specifications provided in the `Modelfile`.  
+   > Make sure your `Modelfile` is in the project directory and properly configured with the base model as `phi4`.
+
+   ✅ **Before creating the model**, ensure that `phi4-mini` is present on your device by running:
+
+   ```bash
+   ollama run phi4-mini
+
 
 5. Start the development server:
 
