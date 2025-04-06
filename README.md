@@ -43,6 +43,7 @@ A custom AI model analyzes your resume and the provided job description, giving 
 ## 🛠️ Technology Used
 
 - **Next.js** – Used to build the frontend of the website.
+- **MongoDB** - Used to store the Data of the resumes
 - **PyMuPDF** – Python library used to extract text from uploaded PDF resumes.
 - **LLaMA 3.2** (via **Ollama**) – Used to analyze resumes and extract structured JSON data representing different sections.
 - **Evaluator Bot** – A custom **Phi-4** based AI model trained to deeply understand industry technologies and assess resumes based on job descriptions.
