@@ -29,7 +29,7 @@ export default function Home() {
       </header>
 
       <main className="flex-1 container mx-auto px-6 py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6 text-slate-800">
+        <h1 className="text-3xl font-bold mb-6 text-slate-800 text-center">
           Resume Job Match Evaluator
         </h1>
         <p className="text-center mb-8 text-slate-600">
