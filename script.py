@@ -4,6 +4,15 @@ import fitz  # PyMuPDF
 import requests
 import base64
 import re
+from pymongo import MongoClient  # Add this import
+
+# Add MongoDB connection function
+def get_mongo_connection():
+    # Use environment variables in production
+    mongodb_uri = "mongodb://localhost:27017/"  # Replace with your connection string
+    client = MongoClient(mongodb_uri)
+    db = client["resumatch"]
+    return db
 
 def extract_text_from_pdf(pdf_path):
     doc = fitz.open(pdf_path)
@@ -92,15 +101,54 @@ def main():
         evaluation_response = query_ollama("evaluator", evaluation_prompt)
         cleaned_evaluation = clean_json_response(evaluation_response)
         
-        # Validate the JSON before returning it
-        json.loads(cleaned_evaluation)  # This will throw an error if the JSON is invalid
+        # Parse the evaluation to JSON
+        evaluation_json = json.loads(cleaned_evaluation)
         
-        # Print the evaluation result to stdout
+        # Store resume data in MongoDB
+        try:
+            store_resume_data(evaluation_json, job_description, pdf_path)
+        except Exception as db_error:
+            # Log the error but continue with the normal flow
+            print(f"DB storage error: {str(db_error)}", file=sys.stderr)
+        
+        # Print the evaluation result to stdout - this maintains existing functionality
         print(cleaned_evaluation)
         
     except Exception as e:
         print(json.dumps({"error": str(e)}))
         sys.exit(1)
+
+def store_resume_data(evaluation_data, job_description, pdf_path):
+    """Store the resume evaluation data in MongoDB"""
+    try:
+        db = get_mongo_connection()
+        resume_collection = db["resume_evaluations"]
+        
+        # Extract name and email for easier querying
+        personal_info = evaluation_data.get("Personal Information", {})
+        name = personal_info.get("Name", "Unknown")
+        email = personal_info.get("Email", "Unknown")
+        
+        # Extract overall match score
+        overall_match = evaluation_data.get("overallMatch", 0)
+        
+        # Create document to store
+        document = {
+            "name": name,
+            "email": email,
+            "overall_match": overall_match,
+            "job_description": job_description,
+            "pdf_filename": pdf_path.split("/")[-1],  # Just the filename
+            "full_evaluation": evaluation_data  # Store the complete evaluation
+        }
+        
+        # Insert document
+        resume_collection.insert_one(document)
+        
+    except Exception as e:
+        # Raise the exception but it will be caught in the main function
+        # and won't disrupt the normal flow
+        raise Exception(f"Failed to store in MongoDB: {str(e)}")
 
 def query_ollama(model, prompt):
     url = "http://localhost:11434/api/generate"
